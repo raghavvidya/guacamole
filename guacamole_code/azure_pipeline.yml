@@ -1,0 +1,82 @@
+pool:
+  name: Azure Pipelines
+  
+trigger:
+ - ''
+
+stages:
+- stage: CreateCloudformation
+  displayName: Build and Create Cloudformation
+  jobs:
+  - job: StartBuildCEnvironment
+    variables:
+    - group: guacamole-dev
+    pool:
+      name: Azure Pipelines
+      vmImage: 'ubuntu-latest'
+    steps:
+      - task: AWSShellScript@1    
+        displayName: Configure environment
+        inputs:
+          awsCredentials: 'Azure-LinxAcc'
+          regionName: 'us-east-1'
+          scriptType: 'filePath'
+          filePath: 'guacamole_code/config_environment.sh'
+      - task: CloudFormationCreateOrUpdateStack@1
+        displayName: Create Cloudformation stack
+        inputs:
+          awsCredentials: 'Azure-LinxAcc'
+          regionName: 'us-east-1'
+          stackName: $(StackName)
+          logRequest: true
+          logResponse: true
+          templateSource: 'file'
+          templateFile: 'guacamole_code/guacamole_cloudformation.yml'
+          templateParametersSource: 'inline'
+          templateParameters: |
+            - ParameterKey: DBNAME
+              ParameterValue: $(DBNAME)
+            - ParameterKey: DBUSER
+              ParameterValue: $(DBUSER)
+            - ParameterKey: DBPASSWD
+              ParameterValue: $(DBPASSWD)             
+            - ParameterKey: MYSQLUSER
+              ParameterValue: $(MYSQLUSER)
+            - ParameterKey: MYSQLPASSWD
+              ParameterValue: $(MYSQLPASSWD)
+            - ParameterKey: AMIID
+              ParameterValue: $(AMIID)
+            - ParameterKey: InstanceType
+              ParameterValue: $(InstanceType)
+            - ParameterKey: KeyName
+              ParameterValue: $(KeyName)             
+            - ParameterKey: LoadBalancerCertificateArn
+              ParameterValue: $(LoadBalancerCertificateArn)
+            - ParameterKey: MyVPC
+              ParameterValue: $(MyVPC)
+            - ParameterKey: RDSInstanceType
+              ParameterValue: $(RDSInstanceType)
+            - ParameterKey: SubnetID1
+              ParameterValue: $(SubnetID1)
+            - ParameterKey: SubnetID2
+              ParameterValue: $(SubnetID2) 
+            - ParameterKey: JKSTOREPASSWD
+              ParameterValue: $(JKSTOREPASSWD) 
+            - ParameterKey: DBSnapshotIdentifier
+              ParameterValue: $(DBSnapshotIdentifier)  
+            - ParameterKey: Application
+              ParameterValue: $(Application)         
+      - task: AWSShellScript@1
+        displayName: Tag root volumes
+        inputs:
+          awsCredentials: 'Azure-LinxAcc'
+          regionName: 'us-east-1'
+          scriptType: 'inline'
+          inlineScript: |
+            set -x
+            EC2_VOLUMES=$(aws ec2 describe-instances --region "${AWS_REGION}" --filter "Name=tag:Application,Values=$(Application)" --query "Reservations[*].Instances[*].BlockDeviceMappings[*].Ebs.[VolumeId]" --output text)
+            
+            while read -r RESOURCE; do
+            	aws ec2 create-tags --resources "$RESOURCE" --region "${AWS_REGION}" --tags "Key=Name,Value=${STACKNAME}-rootvolume"
+                aws ec2 create-tags --resources "$RESOURCE" --region "${AWS_REGION}" --tags "Key=Application,Value=${APPLICATION}"
+            done <<< "$EC2_VOLUMES"

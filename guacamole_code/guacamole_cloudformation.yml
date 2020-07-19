@@ -1,0 +1,346 @@
+---
+Parameters:
+  MYSQLUSER:
+    Type: String
+  MYSQLPASSWD:
+    Type: String
+    NoEcho: true
+  DBNAME:
+    Type: String
+  DBUSER:
+    Type: String
+  DBPASSWD:
+    Type: String
+    NoEcho: true
+  JKSTOREPASSWD:
+    Type: String
+    NoEcho: true
+  AllocatedStorage:
+    Type: Number
+    Description: Allocated Storage for RDS in GB
+    Default: 20
+  AutoMinorVersionUpgrade:
+    Description: Allow Automatic Minor Version Upgrades?
+    Type: String
+    Default: 'false'
+  BackupRetentionPeriod:
+    Description: Enter Backup Retention Period in Days.
+    Type: Number
+    Default: '1'
+  RDSInstanceType:
+    Description: Select Instance Type.
+    Type: String
+  DBSnapshotIdentifier:
+    Description: DB Snapshot ARN 
+    Type: String
+  TcpPort:
+    Description: Enter RDS Listening TCP Port number.
+    Type: Number
+    Default: '3306'
+  ClusterSize:
+    Type: Number
+    Default: 1
+  MultiAvailabilityZone:
+    Description: Enable Multi Availability Zones?
+    Type: String
+    Default: 'false'
+  AMIID:
+    Type: String
+  InstanceType:
+    Type: String
+  KeyName:
+    Type: String
+  SubnetID1:
+    Type: String
+  SubnetID2:
+    Type: String
+  AsgMaxSize:
+    Type: Number
+    Default: 3
+  AsgMinSize:
+    Type: Number
+    Default: 2           
+  Application:
+    Type: String
+  MyVPC:
+    Description: VPC to operate in
+    Type: String
+  LoadBalancerCertificateArn:
+    Description: ARN of HTTPS Certificate
+    Type: String
+
+Conditions: 
+  UseDBSnapshot: !Not [!Equals [!Ref DBSnapshotIdentifier, ""]]
+
+Resources:
+  ServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref MyVPC
+      GroupDescription: allow connections from specified CIDR ranges
+      SecurityGroupIngress:
+      - Description: 'permit https access from all'
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 0.0.0.0/0
+      - Description: 'permit ssh access from bastion'
+        IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 90.213.107.20/32
+      Tags:
+        - Key: "Name"
+          Value: !Sub '${AWS::StackName}-InstanceSG'
+        - Key: "Application"
+          Value: !Ref Application      
+
+  SGBaseIngress1:
+   Type: 'AWS::EC2::SecurityGroupIngress'
+   Properties:
+      Description: 'permit http access to ELB'
+      GroupId: !Ref ServerSecurityGroup
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      SourceSecurityGroupId: !GetAtt ServerSecurityGroup.GroupId
+
+  SGBaseIngress2:
+   Type: 'AWS::EC2::SecurityGroupIngress'
+   Properties:
+      Description: 'permit http access to ELB'
+      GroupId: !Ref ServerSecurityGroup
+      IpProtocol: tcp
+      FromPort: 8080
+      ToPort: 8080
+      SourceSecurityGroupId: !GetAtt ServerSecurityGroup.GroupId
+  DBSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: 'RDS Security Group'
+      SecurityGroupEgress:
+        - Description: 'deny all outbound'
+          IpProtocol: '-1'
+          CidrIp: '127.0.0.1/32'
+      SecurityGroupIngress:
+        - Description: 'permit MySQl (3306) from ServerSecurityGroup'
+          FromPort: 3306
+          IpProtocol: tcp
+          SourceSecurityGroupId: !GetAtt ServerSecurityGroup.GroupId
+          ToPort: 3306
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-DBSG'
+        - Key: "Application"
+          Value: !Ref Application   
+      VpcId: !Ref MyVPC
+
+  AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      TargetGroupARNs:
+       - !Ref DefaultTargetGroup
+      VPCZoneIdentifier:
+      - !Ref SubnetID1
+      - !Ref SubnetID2
+      MinSize:
+        Ref: AsgMinSize
+      MaxSize:
+        Ref: AsgMaxSize
+      DesiredCapacity:
+        Ref: AsgMinSize
+      LaunchConfigurationName:
+        Ref: LaunchConfig
+      Tags:
+        - Key: "Name"
+          Value: !Sub '${AWS::StackName}-ASG'
+          PropagateAtLaunch: true
+        - Key: "Application"
+          Value: !Ref Application
+          PropagateAtLaunch: true
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: PT40M
+        Count: !Ref ClusterSize
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+        MinInstancesInService: !Ref ClusterSize
+        MaxBatchSize: 2
+        WaitOnResourceSignals: True
+        PauseTime: PT10M
+
+  ElbGuacamole:
+      Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+      Properties:
+          Name: !Sub '${AWS::StackName}-ALB'
+          Scheme: internal
+          Subnets: 
+            - !Ref SubnetID1
+            - !Ref SubnetID2
+          SecurityGroups: 
+              - !Ref ServerSecurityGroup
+          Tags: 
+            - Key: "Name"
+              Value: !Sub '${AWS::StackName}-ALB'
+            - Key: "Application"
+              Value: !Ref Application  
+                
+  LoadBalancerListenerHTTP:
+      Type: AWS::ElasticLoadBalancingV2::Listener
+      Properties:
+          LoadBalancerArn: !Ref ElbGuacamole
+          Port: 80
+          Protocol: HTTP 
+          DefaultActions: 
+              - Type: forward
+                TargetGroupArn: !Ref DefaultTargetGroup 
+                
+  LoadBalancerListenerHTTPS:
+      Type: AWS::ElasticLoadBalancingV2::Listener
+      Properties:
+          Certificates:
+              - CertificateArn: !Ref LoadBalancerCertificateArn
+          LoadBalancerArn: !Ref ElbGuacamole
+          Port: 443
+          Protocol: HTTPS 
+          DefaultActions: 
+              - Type: forward
+                TargetGroupArn: !Ref DefaultTargetGroup 
+                
+  DefaultTargetGroup:
+      Type: AWS::ElasticLoadBalancingV2::TargetGroup
+      Properties:
+          Name: !Sub ${Application}-TargetGroup
+          VpcId: !Ref MyVPC
+          Port: 8080
+          Protocol: HTTP
+          HealthCheckPath: /guacamole/
+          Tags: 
+            - Key: "Name"
+              Value: !Sub '${AWS::StackName}-TargetGroup'
+            - Key: "Application"
+              Value: !Ref Application  
+          
+  DbSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription:
+        Fn::Join:
+        - ''
+        - - 'RDS Subnet Group for '
+          - Ref: AWS::StackName
+      SubnetIds:
+      - Ref: SubnetID1
+      - Ref: SubnetID2
+      Tags:
+        - Key: "Name"
+          Value: !Sub '${AWS::StackName}-DbSubnetGroup'
+        - Key: "Application"
+          Value: !Ref Application 
+          
+  DbInstance:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Snapshot
+    DependsOn:
+    - DbSubnetGroup
+    Properties:
+      AllocatedStorage:
+        Ref: AllocatedStorage
+      AllowMajorVersionUpgrade: 'false'
+      AutoMinorVersionUpgrade:
+        Ref: AutoMinorVersionUpgrade
+      BackupRetentionPeriod:
+        Ref: BackupRetentionPeriod
+      DBInstanceClass:
+        Ref: RDSInstanceType
+      DBInstanceIdentifier:
+        Ref: DBNAME
+      DBSubnetGroupName:
+        Ref: DbSubnetGroup
+      Engine: MySQL
+      EngineVersion: '5.7'
+      MasterUsername:
+        Ref: MYSQLUSER
+      MasterUserPassword:
+        Ref: MYSQLPASSWD
+      MultiAZ:
+        Ref: MultiAvailabilityZone
+      Port:
+        Ref: TcpPort
+      PubliclyAccessible: 'false'
+      StorageEncrypted: 'false'
+      DBSnapshotIdentifier: !If [UseDBSnapshot, !Ref DBSnapshotIdentifier, !Ref "AWS::NoValue"]
+      StorageType: gp2
+      VPCSecurityGroups:
+      - Ref: DBSecurityGroup
+      Tags:
+        - Key: "Name"
+          Value: !Sub '${AWS::StackName}-Database'
+        - Key: "Application"
+          Value: !Ref Application 
+                              
+  LaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    DependsOn: DbInstance
+    Properties:
+      ImageId:
+        Ref: AMIID
+      AssociatePublicIpAddress: true
+      BlockDeviceMappings:
+      - DeviceName: /dev/xvda
+        Ebs:
+          VolumeSize: 10
+          VolumeType: gp2
+      InstanceType:
+        Ref: InstanceType
+      KeyName:
+        Ref: KeyName
+      UserData:
+        Fn::Base64:
+          Fn::Join: 
+            - ''
+            - - "#!/bin/bash"
+              - "\n echo 'UserDataReplaceMe"
+              - "'>  /tmp/runMe_base64.tar.gz"
+              - "\n echo export MYSQL_USER="
+              - !Ref MYSQLUSER              
+              - " > /tmp/env.sh"
+              - "\n echo export MYSQL_PASSWD="
+              - !Ref MYSQLPASSWD             
+              - " >> /tmp/env.sh"
+              - "\n echo export DB_NAME="
+              - !Ref DBNAME              
+              - " >> /tmp/env.sh"
+              - "\n echo export DB_USER="
+              - !Ref DBUSER              
+              - " >> /tmp/env.sh"
+              - "\n echo export DB_PASSWD="
+              - !Ref DBPASSWD              
+              - " >> /tmp/env.sh"
+              - "\n echo export MYSQL_SERVER_NAME="
+              - !GetAtt DbInstance.Endpoint.Address           
+              - " >> /tmp/env.sh"
+              - "\n echo export MYSQL_PORT="
+              - !GetAtt DbInstance.Endpoint.Port             
+              - " >> /tmp/env.sh"
+              - "\n echo export JKSTORE_PASSWD="
+              - !Ref JKSTOREPASSWD             
+              - " >> /tmp/env.sh"
+              - "\n echo export STACK_NAME="
+              - !Ref AWS::StackName             
+              - " >> /tmp/env.sh"
+              - "\n cd /tmp"
+              - "\n base64 -d /tmp/runMe_base64.tar.gz > /tmp/runMe.tar.gz"
+              - "\n tar xvfz /tmp/runMe.tar.gz"
+              - "\n sh +x /tmp/guacamole_code/userdata.sh"
+
+      SecurityGroups:
+      - Ref: ServerSecurityGroup    
+
+Outputs:
+  LoadBalancerDNSName:
+    Description: Load balancer URL
+    Value: !GetAtt 
+      - ElbGuacamole
+      - DNSName
+  
