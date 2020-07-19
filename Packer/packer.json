@@ -1,0 +1,53 @@
+{  
+  "variables": {
+    "access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+    "secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}"
+  },
+
+    "builders": [{
+        "type": "amazon-ebs",
+        "access_key": "{{user `access_key`}}",
+        "secret_key": "{{user `secret_key`}}",
+        "region": "us-east-1",
+        "source_ami": "ami-0015fcaa5516c75ed",
+        "instance_type": "t2.micro",
+        "ssh_username": "ec2-user",
+        "ami_name": "customami-guacamole-{{ isotime \"200601020304\" | clean_resource_name }} ",
+        "tags": {
+          "OS_Version": "RedHat",
+          "Release": "7.8",
+          "Base_AMI_Name": "{{ .SourceAMIName }}",
+          "Name": "customami-guacamole-{{isotime \"200601020304\" | clean_resource_name}}"
+        },
+        "snapshot_tags": {
+          "OS_Version": "RedHat",
+          "Release": "7.8",
+          "Base_AMI_Name": "{{ .SourceAMIName }}",
+          "Name": "customami-guacamole-{{isotime \"200601020304\" | clean_resource_name}}"
+        },   
+        "run_volume_tags": {
+          "OS_Version": "RedHat",
+          "Release": "7.8",
+          "Base_AMI_Name": "{{ .SourceAMIName }}",
+          "Name": "customami-guacamole-{{isotime \"200601020304\" | clean_resource_name}}"
+        },
+        "run_tags": {
+          "OS_Version": "RedHat",
+          "Release": "7.8",
+          "Base_AMI_Name": "{{ .SourceAMIName }}",
+          "Name": "customami-guacamole-{{isotime \"200601020304\" | clean_resource_name}}"
+        }
+        }],
+
+    "provisioners": [{
+        "type": "shell",
+        "execute_command": "echo 'packer' | {{ .Vars }} sudo -S -E bash '{{ .Path }}'",
+        "script": "./Packer/provision.sh"
+    },
+    {
+        "type": "shell",
+        "execute_command": "echo 'packer' | {{ .Vars }} sudo -S -E bash '{{ .Path }}'",
+        "script": "./Packer/cleanup.sh"
+    }
+    ]
+}

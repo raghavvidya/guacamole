@@ -1,0 +1,19 @@
+trigger:
+- ''
+
+stages:
+- stage: CreateCloudformation
+  displayName: Build and Create Cloudformation
+  jobs:
+  - job: PackerBuild
+    pool:
+      name: Azure Pipelines
+      vmImage: 'ubuntu-latest'
+    steps:
+      - task: Packer@1
+        displayName: Packer Build
+        inputs:
+          connectedServiceType: 'aws'
+          connectedServiceAWS: 'Azure-LinxAcc'
+          templatePath: 'Packer/packer.json'
+          command: 'build'
