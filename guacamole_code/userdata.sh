@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 source /tmp/env.sh
 # default parameters for guacamole server/agent
 export LIBJPEG_VER="1.5.2"
@@ -33,6 +32,10 @@ export SERVER_HOSTNAME="localhost"
 export TIME_FORMAT=$(date +"%m-%d-%Y_%H:%M:%S")
 export LOG_PATH="/var/log/guacamole-${GUACA_VER}_${TIME_FORMAT}.log"
 export TEE_CMD="tee -a ${LOG_PATH}"
+export EC2_DOMAIN="${EC2_DOMAIN:-localdomain}"
+export ETC_NETWORK_CONFIG="/etc/sysconfig/network"
+export ETC_HOSTS="/etc/hosts"
+
 
 #### List of functions started .....
 
@@ -209,18 +212,31 @@ check_services () {
     if systemctl status nginx tomcat guacd 1>/dev/null 
     then
       log "All services are running"
-      cfn-signal -e 0 --stack ${STACK_NAME} --resource AutoScalingGroup --region ${REGION}
+      cfn-signal -e 0 --stack ${STACK_NAME} --resource ${RESOURCE}  --region ${REGION}
     else
       log "Some of the service not running"
-      cfn-signal -e 1 --stack ${STACK_NAME} --resource AutoScalingGroup --region ${REGION}
+      cfn-signal -e 1 --stack ${STACK_NAME} --resource ${RESOURCE} --region ${REGION}
     fi
 
 }
 
-guacamole_install
+set_hostname () {
+  hostnamectl set-hostname "${EC2_HOSTNAME}.${EC2_DOMAIN}" --static | ${TEE_CMD}
+  hostnamectl set-hostname "${EC2_HOSTNAME}.${EC2_DOMAIN}" | ${TEE_CMD}
+
+  log "Updating the host entry"
+  # Update the host entry /etc/sysconfig/network file
+  sed -i -e "/^HOSTNAME/s/^.*$/HOSTNAME=${EC2_HOSTNAME}.${EC2_DOMAIN}/" ${ETC_NETWORK_CONFIG}
+
+  export LOCAL_IP=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)
+  echo "${LOCAL_IP} ${EC2_HOSTNAME} ${EC2_HOSTNAME}.${EC2_DOMAIN}" >> ${ETC_HOSTS}
+
+}
+set_hostname
 config_db
 config_nginx
 config_tomcat
 selinux
 restart_services
 check_services
+#
