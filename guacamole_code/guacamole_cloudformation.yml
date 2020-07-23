@@ -325,6 +325,7 @@ Resources:
   ElbGuacamole:
       Type: AWS::ElasticLoadBalancingV2::LoadBalancer
       Properties:
+          Scheme: internal
           Name: !Sub '${AWS::StackName}-ALB'
           Subnets: 
             - !Ref SubnetID1
