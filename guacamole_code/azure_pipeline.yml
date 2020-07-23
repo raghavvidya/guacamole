@@ -8,25 +8,50 @@ stages:
 - stage: CreateCloudformation
   displayName: Build and Create Cloudformation
   jobs:
-  - job: StartBuildCEnvironment
+  - job: FailoverRDSDatabase
     variables:
     - group: guacamole-dev
     pool:
       name: Azure Pipelines
       vmImage: 'ubuntu-latest'
     steps:
-      - task: AWSShellScript@1    
+      - task: AWSCLI@1
+        displayName: Failover the RDS Database
+        condition:  eq(variables['DR_TEST'], 'Yes') 
+        inputs:
+          awsCredentials: 'Azure-LinxAcc'
+          regionName: $(REGION)
+          awsCommand: 'rds'
+          awsSubCommand: 'reboot-db-instance'
+          awsArguments: '--db-instance-identifier $(DBNAME) --force-failover'
+      - task: AWSCLI@1
+        displayName: Wait for RDS Database Available
+        condition:  eq(variables['DR_TEST'], 'Yes') 
+        inputs:
+          awsCredentials: 'Azure-LinxAcc'
+          regionName: $(REGION)
+          awsCommand: 'rds'
+          awsSubCommand: 'wait' 
+          awsArguments: 'db-instance-available --db-instance-identifier $(DBNAME)'
+  - job: BuildStack
+    variables:
+    - group: guacamole-dev
+    pool:
+      name: Azure Pipelines
+      vmImage: 'ubuntu-latest'
+    steps:
+      - task: AWSShellScript@1 
         displayName: Configure environment
         inputs:
           awsCredentials: 'Azure-LinxAcc'
-          regionName: 'us-east-1'
+          regionName: $(REGION)
           scriptType: 'filePath'
           filePath: 'guacamole_code/config_environment.sh'
       - task: CloudFormationCreateOrUpdateStack@1
         displayName: Create Cloudformation stack
         inputs:
           awsCredentials: 'Azure-LinxAcc'
-          regionName: 'us-east-1'
+          regionName: $(REGION)
           stackName: $(StackName)
           logRequest: true
           logResponse: true
@@ -39,7 +64,9 @@ stages:
             - ParameterKey: DBUSER
               ParameterValue: $(DBUSER)
             - ParameterKey: DBPASSWD
-              ParameterValue: $(DBPASSWD)             
+              ParameterValue: $(DBPASSWD)   
+            - ParameterKey: DBVERSION
+              ParameterValue: $(DBVERSION)           
             - ParameterKey: MYSQLUSER
               ParameterValue: $(MYSQLUSER)
             - ParameterKey: MYSQLPASSWD
@@ -65,18 +92,24 @@ stages:
             - ParameterKey: DBSnapshotIdentifier
               ParameterValue: $(DBSnapshotIdentifier)  
             - ParameterKey: Application
-              ParameterValue: $(Application)         
+              ParameterValue: $(Application)   
+            - ParameterKey: EC2DOMAIN
+              ParameterValue: $(EC2DOMAIN)  
+            - ParameterKey: HOSTNAME1
+              ParameterValue: $(HOSTNAME1) 
+            - ParameterKey: HOSTNAME2
+              ParameterValue: $(HOSTNAME2)       
       - task: AWSShellScript@1
         displayName: Tag root volumes
         inputs:
           awsCredentials: 'Azure-LinxAcc'
-          regionName: 'us-east-1'
+          regionName: $(REGION)
           scriptType: 'inline'
           inlineScript: |
             set -x
-            EC2_VOLUMES=$(aws ec2 describe-instances --region "${AWS_REGION}" --filter "Name=tag:Application,Values=$(Application)" --query "Reservations[*].Instances[*].BlockDeviceMappings[*].Ebs.[VolumeId]" --output text)
+            EC2_VOLUMES=$(aws ec2 describe-instances --region "$(REGION)" --filter "Name=tag:Application,Values=$(Application)" --query "Reservations[*].Instances[*].BlockDeviceMappings[*].Ebs.[VolumeId]" --output text)
             
             while read -r RESOURCE; do
-            	aws ec2 create-tags --resources "$RESOURCE" --region "${AWS_REGION}" --tags "Key=Name,Value=${STACKNAME}-rootvolume"
-                aws ec2 create-tags --resources "$RESOURCE" --region "${AWS_REGION}" --tags "Key=Application,Value=${APPLICATION}"
+            	aws ec2 create-tags --resources "$RESOURCE" --region "$(REGION)" --tags "Key=Name,Value=${STACKNAME}-rootvolume"
+                aws ec2 create-tags --resources "$RESOURCE" --region "$(REGION)" --tags "Key=Application,Value=${APPLICATION}"
             done <<< "$EC2_VOLUMES"
