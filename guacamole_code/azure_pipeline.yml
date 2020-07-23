@@ -8,31 +8,6 @@ stages:
 - stage: CreateCloudformation
   displayName: Build and Create Cloudformation
   jobs:
-  - job: FailoverRDSDatabase
-    variables:
-    - group: guacamole-dev
-    pool:
-      name: Azure Pipelines
-      vmImage: 'ubuntu-latest'
-    steps:
-      - task: AWSCLI@1
-        displayName: Failover the RDS Database
-        condition:  eq(variables['DR_TEST'], 'Yes') 
-        inputs:
-          awsCredentials: 'Azure-LinxAcc'
-          regionName: $(REGION)
-          awsCommand: 'rds'
-          awsSubCommand: 'reboot-db-instance'
-          awsArguments: '--db-instance-identifier $(DBNAME) --force-failover'
-      - task: AWSCLI@1
-        displayName: Wait for RDS Database Available
-        condition:  eq(variables['DR_TEST'], 'Yes') 
-        inputs:
-          awsCredentials: 'Azure-LinxAcc'
-          regionName: $(REGION)
-          awsCommand: 'rds'
-          awsSubCommand: 'wait' 
-          awsArguments: 'db-instance-available --db-instance-identifier $(DBNAME)'
   - job: BuildStack
     variables:
     - group: guacamole-dev
