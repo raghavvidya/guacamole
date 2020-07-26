@@ -76,7 +76,6 @@ guacamole_install () {
               openssl-devel \
               ${PKG_REPO}/libvorbis-devel-1.3.3-8.el7.1.x86_64.rpm \
               ${PKG_REPO}/libwebp-devel-0.3.0-7.el7.x86_64.rpm \
-              libwebp-devel   \
               libjpeg-turbo-devel  \
               cairo-devel   \
               libpng-devel    \
@@ -89,7 +88,6 @@ guacamole_install () {
               libvncserver-devel \
               libwebsockets-devel  \
               openssl-devel  \
-              libvorbis-devel \
               mariadb  \
               mariadb-server | ${TEE_CMD}
 
