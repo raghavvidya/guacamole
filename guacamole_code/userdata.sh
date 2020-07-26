@@ -48,23 +48,6 @@ log (){
 
 
 
-guacamole_install () {
- 
-  cd ${INSTALL_DIR}
-
-  log "Installing the Guacamole server packages ..."
-  cd server
-  ./configure --with-init-dir=/etc/init.d | ${TEE_CMD}
-  make | ${TEE_CMD}
-  make install | ${TEE_CMD}
-  ldconfig | ${TEE_CMD}
-  cd ../
-
- log "Installing the Guacamole client packages ..."
- cp -v client/guacamole.war ${LIB_DIR}guacamole.war | ${TEE_CMD}
-}
-
-
 
 config_db () {
   log "Configuring the MySQL DB ..."
