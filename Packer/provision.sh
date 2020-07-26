@@ -57,38 +57,40 @@ update_os () {
 guacamole_install () {
   log "Installing the Guacamole dependencies packages ..."
   yum install -y \
-              ${LIBJPEG_URL}/libjpeg-turbo-official-${LIBJPEG_VER}.${MACHINE_ARCH}.rpm \
-              ${PKG_REPO}/freerdp-devel-2.0.0-1.rc4.el7.x86_64.rpm \
-              ${PKG_REPO}/libwinpr-devel-2.0.0-1.rc4.el7.x86_64.rpm \
-              ${PKG_REPO}/freerdp-devel-2.0.0-1.rc4.el7.x86_64.rpm \
-              ${PKG_REPO}/pango-devel-1.42.4-4.el7_7.x86_64.rpm \
-              ${PKG_REPO}/libssh2-devel-1.8.0-3.el7.x86_64.rpm \
-              ${PKG_REPO}/libvorbis-devel-1.3.3-8.el7.1.x86_64.rpm \
-              ${PKG_REPO}/pkgconfig-0.27.1-4.el7.x86_64.rpm \
-              ${PKG_REPO}/libogg-devel-1.3.0-7.el7.x86_64.rpm \
-              ${PKG_REPO}/libvorbis-devel-1.3.3-8.el7.1.x86_64.rpm \
-              ${PKG_REPO}/uuid-devel-1.6.2-26.el7.x86_64.rpm \
-              ${PKG_REPO}/libwebp-devel-0.3.0-7.el7.x86_64.rpm \
-              ${PKG_REPO}/libwebp-devel-0.3.0-7.el7.x86_64.rpm \
-              ${PKG_REPO}/pulseaudio-libs-devel-10.0-5.el7.x86_64.rpm \
-              ffmpeg-devel \
-              libwebp-devel \
-              libjpeg-turbo-devel \
               cairo-devel \
+              libjpeg-turbo-devel \
+              libjpeg-devel \
               libpng-devel \
               libtool \
-              wget \
-              gcc \
-              tomcat \
-              unzip \
+              ${PKG_REPO}/uuid-devel-1.6.2-26.el7.x86_64.rpm \
+              ffmpeg-devel \
+              ${PKG_REPO}/libwinpr-devel-2.0.0-1.rc4.el7.x86_64.rpm \
+              ${PKG_REPO}/freerdp-devel-2.0.0-1.rc4.el7.x86_64.rpm \
+              pango-devel \
+              ${PKG_REPO}/libssh2-devel-1.8.0-3.el7.x86_64.rpm \
               libtelnet-devel \
               libvncserver-devel \
               libwebsockets-devel \
+              pulseaudio-libs-devel \
               openssl-devel \
+              ${PKG_REPO}/libvorbis-devel-1.3.3-8.el7.1.x86_64.rpm \
+              ${PKG_REPO}/libwebp-devel-0.3.0-7.el7.x86_64.rpm \
+              libwebp-devel   \
+              libjpeg-turbo-devel  \
+              cairo-devel   \
+              libpng-devel    \
+              libtool      \
+              wget     \
+              gcc     \
+              tomcat   \
+              unzip    \
+              libtelnet-devel  \
+              libvncserver-devel \
+              libwebsockets-devel  \
+              openssl-devel  \
               libvorbis-devel \
-              mariadb \
+              mariadb  \
               mariadb-server | ${TEE_CMD}
-
 
   ln -vfs /opt/libjpeg-turbo/include/* /usr/include/ | ${TEE_CMD}
   ln -vfs /opt/libjpeg-turbo/lib??/* /usr/lib64/ | ${TEE_CMD}
@@ -112,6 +114,19 @@ guacamole_install () {
   mv guacamole-auth-jdbc-${GUACA_VER} extension | ${TEE_CMD}
 
   tar xzf ${MYSQL_CONNECTOR}.tar.gz && rm -f ${MYSQL_CONNECTOR}.tar.gz | ${TEE_CMD}
+
+  cd ${INSTALL_DIR}
+
+  log "Compling the Guacamole server packages ..."
+  cd server
+  ./configure --with-init-dir=/etc/init.d | ${TEE_CMD}
+  make | ${TEE_CMD}
+  make install | ${TEE_CMD}
+  ldconfig | ${TEE_CMD}
+  cd ../
+
+  log "Installing the Guacamole client packages ..."
+  cp -v client/guacamole.war ${LIB_DIR}guacamole.war | ${TEE_CMD}
 }
 
 install_nginx () {
