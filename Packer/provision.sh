@@ -66,6 +66,7 @@ guacamole_install () {
               ffmpeg-devel \
               ${PKG_REPO}/libwinpr-devel-2.0.0-1.rc4.el7.x86_64.rpm \
               ${PKG_REPO}/freerdp-devel-2.0.0-1.rc4.el7.x86_64.rpm \
+              ${PKG_REPO}/libogg-devel-1.3.0-7.el7.x86_64.rpm \
               pango-devel \
               ${PKG_REPO}/libssh2-devel-1.8.0-3.el7.x86_64.rpm \
               libtelnet-devel \
