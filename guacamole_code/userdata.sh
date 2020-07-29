@@ -5,7 +5,7 @@ source /tmp/env.sh
 export LIBJPEG_VER="1.5.2"
 export GUACA_VER="1.2.0"
 export GUACA_PORT="4822"
-export LIB_DIR="/var/lib/guacamole/"
+export LIB_DIR="/etc/guacamole/"
 export GUACAMOLE_URIPATH="guacamole"
 export INSTALL_DIR="/usr/local/src/guacamole/${GUACA_VER}/"
 export LIBJPEG_URL="http://sourceforge.net/projects/libjpeg-turbo/files/${LIBJPEG_VER}"
@@ -65,13 +65,12 @@ mysql-password: ${DB_PASSWD}
 mysql-default-max-connections-per-user: 0
 mysql-default-max-group-connections-per-user: 0" > /etc/guacamole/${GUACA_CONF} | ${TEE_CMD}
 
-  ln -vfs ${LIB_DIR}guacamole.war /var/lib/tomcat/webapps | ${TEE_CMD}
   ln -vfs /etc/guacamole/${GUACA_CONF} /usr/share/tomcat/.guacamole/ | ${TEE_CMD}
-  ln -vfs ${LIB_DIR}lib/ /usr/share/tomcat/.guacamole/ | ${TEE_CMD}
-  ln -vfs ${LIB_DIR}extensions/ /usr/share/tomcat/.guacamole/ | ${TEE_CMD}
+  ln -vfs ${LIB_DIR}/ /usr/share/tomcat/.guacamole | ${TEE_CMD}
   ln -vfs /usr/local/lib/freerdp/guac* /usr/lib64/freerdp | ${TEE_CMD}
-  cp -v extension/mysql/guacamole-auth-jdbc-mysql-${GUACA_VER}.jar ${LIB_DIR}extensions/ | ${TEE_CMD}
   cp -v mysql-connector-java-${MYSQL_CONNECTOR_VER}/mysql-connector-java-${MYSQL_CONNECTOR_VER}-bin.jar ${LIB_DIR}/lib/ | ${TEE_CMD}
+  
+  chown -R root:tomcat /etc/guacamole
 
   if [[ ! $(mysql -h ${MYSQL_SERVER_NAME} -u ${MYSQL_USER} -p${MYSQL_PASSWD} -e "show databases"|grep ${DB_NAME}) ]]
   then
