@@ -184,9 +184,9 @@ selinux () {
   restorecon -v "${LIB_DIR}lib/${MYSQL_CONNECTOR}-bin.jar" | ${TEE_CMD}
   
   # allow rds connection
-  chown root:tomcat -R /usr/share/tomcat/.guacamole
-  chown root:root /usr/share/tomcat/.guacamole/lib/mysql-connector-java-${MYSQL_CONNECTOR_VER}-bin.jar
-  restorecon -R /usr/share/tomcat/.guacamole /usr/share/tomcat/.guacamole/lib
+  chown root:tomcat -R /etc/guacamole
+  #chown root:root /usr/share/tomcat/.guacamole/lib/mysql-connector-java-${MYSQL_CONNECTOR_VER}-bin.jar
+  #restorecon -R /usr/share/tomcat/.guacamole /usr/share/tomcat/.guacamole/lib
 }
 
 restart_services () {
