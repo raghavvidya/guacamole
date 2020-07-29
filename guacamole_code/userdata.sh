@@ -99,6 +99,8 @@ sed -i '92i <Connector port="8443" protocol="HTTP/1.1" SSLEnabled="true" \
 
   sed -i "s/JKSTORE_PASSWD/${JKSTORE_PASSWD}/g" /etc/tomcat/server.xml  | ${TEE_CMD}
   keytool -genkey -alias Guacamole -keyalg RSA -keystore /var/lib/tomcat/webapps/.keystore -storepass ${JKSTORE_PASSWD} -keypass ${JKSTORE_PASSWD} ${noprompt} | ${TEE_CMD}
+  chown root:tomcat /var/lib/tomcat/webapps/.keystore
+  
 cat > /tmp/valve.xml <<EOF
     <Valve className="org.apache.catalina.valves.RemoteIpValve"
                internalProxies="127.0.0.1|0:0:0:0:0:0:0:1|::1"
