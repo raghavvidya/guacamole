@@ -142,8 +142,91 @@ enabled=1' > /etc/yum.repos.d/nginx.repo | ${TEE_CMD}
 }
 
 
+additional_packages () {
+  log "Installing the additional Yum packages ..."
+  yum install -y \
+              emacs \
+              libxml2 \
+              texlive \
+              php \
+              libffi-devel \
+              openssl-devel \
+              bzip2-devel \
+              python2-scikit-image.x86_64 \
+              scikit-image-tools \
+              python-sqlalchemy \
+              sqlite \
+              zlib-devel \
+              gcc-c++ \
+              rsync \
+              zip \
+              git \
+              less \
+              history \
+              util-linux \
+              findutils \
+              tree \
+              screen \
+              ctags-etags \
+              emacs-auctex \
+              binutils \
+              glibc \
+              nss-softokn-freebl \
+              
+              openssl-devel  | ${TEE_CMD}            
+}
+
+
+
+install_python37 () {
+  log "Installing the Python3.7 packages ..."
+  cd /usr/src
+  wget https://www.python.org/ftp/python/3.7.7/Python-3.7.7.tgz
+  tar xzf Python-3.7.7.tgz
+  cd Python-3.7.7
+  ./configure --enable-optimizations
+  make altinstall
+}
+
+
+install_pip_packages () {
+  log "Installing the Pip packages ..."
+  ${PIP} install jupyter
+  ${PIP} install numpy
+  ${PIP} install statistics
+  ${PIP} install pandas
+  ${PIP} install pandas
+  ${PIP} install scipy
+  ${PIP} install itertools
+  ${PIP} install python-lxml
+  ${PIP} install nltk
+  ${PIP} install sas7bdat
+  ${PIP} install scikit-learn
+  ${PIP} install sortedcollections
+  ${PIP} install plotly
+  ${PIP} install tensorflow
+  ${PIP} install rdflib
+  ${PIP} install rdflib-jsonld
+  ${PIP} install flask
+  ${PIP} install flask-script
+  ${PIP} install statsmodels
+  ${PIP} install sympy
+  ${PIP} install seaborn
+  ${PIP} install bokeh
+  ${PIP} install plotnine
+  ${PIP} install numba
+  ${PIP} install pyodbc
+  ${PIP} install argparse
+  ${PIP} install psycopg2  
+}
+
+
+
 create_repo
 update_os
 guacamole_install
+additional_packages
+install_python37
+install_pip_packages
 install_nginx
 install_aws
