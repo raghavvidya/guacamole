@@ -5,7 +5,7 @@
 export LIBJPEG_VER="1.5.2"
 export GUACA_VER="1.2.0"
 export GUACA_PORT="4822"
-export LIB_DIR="/var/lib/guacamole/"
+export LIB_DIR="/etc/guacamole/"
 export GUACAMOLE_URIPATH="guacamole"
 export INSTALL_DIR="/usr/local/src/guacamole/${GUACA_VER}/"
 export LIBJPEG_URL="http://sourceforge.net/projects/libjpeg-turbo/files/${LIBJPEG_VER}"
@@ -125,7 +125,10 @@ guacamole_install () {
   cd ../
 
   log "Installing the Guacamole client packages ..."
-  cp -v client/guacamole.war ${LIB_DIR}guacamole.war | ${TEE_CMD}
+  cp -v client/guacamole.war /usr/share/tomcat/guacamole.war | ${TEE_CMD}
+  
+  #changing the permissions
+  chown -R root:tomcat /etc/guacamole /usr/share/tomcat/guacamole.war
 }
 
 install_nginx () {
