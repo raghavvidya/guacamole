@@ -97,7 +97,7 @@ guacamole_install () {
   mkdir -v /etc/guacamole | ${TEE_CMD}
   mkdir -vp ${INSTALL_DIR}{client,selinux} | ${TEE_CMD}
   mkdir -vp ${LIB_DIR}{extensions,lib} | ${TEE_CMD}
-  mkdir -v /usr/share/tomcat/.guacamole/ | ${TEE_CMD}
+  ln -vs ${LIB_DIR} /usr/share/tomcat/.guacamole | ${TEE_CMD}
 
   cd ${INSTALL_DIR}
 
@@ -125,10 +125,10 @@ guacamole_install () {
   cd ../
 
   log "Installing the Guacamole client packages ..."
-  cp -v client/guacamole.war /usr/share/tomcat/guacamole.war | ${TEE_CMD}
+  cp -v client/guacamole.war /var/lib/tomcat/webapps/guacamole.war | ${TEE_CMD}
   
   #changing the permissions
-  chown -R root:tomcat /etc/guacamole /usr/share/tomcat/guacamole.war
+  chown -R root:tomcat /etc/guacamole /var/lib/tomcat/webapps/guacamole.war
 }
 
 install_nginx () {
