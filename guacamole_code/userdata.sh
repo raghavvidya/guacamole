@@ -52,7 +52,7 @@ log (){
 config_db () {
   log "Configuring the MySQL DB ..."
 
-cd ${INSTALL_DIR}
+
 echo "# Hostname and port of guacamole proxy
 guacd-hostname: ${SERVER_HOSTNAME}
 guacd-port:     ${GUACA_PORT}
@@ -66,6 +66,8 @@ mysql-default-max-connections-per-user: 0
 mysql-default-max-group-connections-per-user: 0" > /etc/guacamole/${GUACA_CONF} | ${TEE_CMD}
 
   ln -vfs ${LIB_DIR}/ /usr/share/tomcat/.guacamole | ${TEE_CMD}
+  
+  cd ${INSTALL_DIR}
   ln -vfs /usr/local/lib/freerdp/guac* /usr/lib64/freerdp | ${TEE_CMD}
   cp -v extension/mysql/guacamole-auth-jdbc-mysql-${GUACA_VER}.jar  ${LIB_DIR}/extensions/
   cp -v mysql-connector-java-${MYSQL_CONNECTOR_VER}/mysql-connector-java-${MYSQL_CONNECTOR_VER}-bin.jar ${LIB_DIR}/lib/ | ${TEE_CMD}
@@ -172,9 +174,6 @@ selinux () {
   setsebool -P httpd_can_network_relay 1 | ${TEE_CMD}
   setsebool -P tomcat_can_network_connect_db 1 | ${TEE_CMD}
 
-  # Guacamole Client Context
-  semanage fcontext -a -t tomcat_exec_t "${LIB_DIR}guacamole.war" | ${TEE_CMD}
-  restorecon -v "${LIB_DIR}guacamole.war" | ${TEE_CMD}
 
   # Guacamole JDBC Extension Context
   semanage fcontext -a -t tomcat_exec_t "${LIB_DIR}extensions/guacamole-auth-jdbc-mysql-${GUACA_VER}.jar" | ${TEE_CMD}
