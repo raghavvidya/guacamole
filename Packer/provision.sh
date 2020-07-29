@@ -24,6 +24,7 @@ export MACHINE_ARCH=`uname -m`
 export TIME_FORMAT=$(date +"%m-%d-%Y_%H:%M:%S")
 export LOG_PATH="/tmp/guacamole-${GUACA_VER}_${TIME_FORMAT}.log"
 export TEE_CMD="tee -a ${LOG_PATH}"
+export PIP="/usr/local/bin/pip3.7"
 
 #### List of functions started .....
 
