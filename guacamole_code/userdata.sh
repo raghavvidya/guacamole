@@ -65,7 +65,7 @@ mysql-password: ${DB_PASSWD}
 mysql-default-max-connections-per-user: 0
 mysql-default-max-group-connections-per-user: 0" > /etc/guacamole/${GUACA_CONF} | ${TEE_CMD}
 
-  ln -vfs ${LIB_DIR}/ /usr/share/tomcat/.guacamole | ${TEE_CMD}
+  ln -vs ${LIB_DIR} /usr/share/tomcat/.guacamole | ${TEE_CMD}
   
   cd ${INSTALL_DIR}
   ln -vfs /usr/local/lib/freerdp/guac* /usr/lib64/freerdp | ${TEE_CMD}
