@@ -65,9 +65,9 @@ mysql-password: ${DB_PASSWD}
 mysql-default-max-connections-per-user: 0
 mysql-default-max-group-connections-per-user: 0" > /etc/guacamole/${GUACA_CONF} | ${TEE_CMD}
 
-  ln -vfs /etc/guacamole/${GUACA_CONF} /usr/share/tomcat/.guacamole/ | ${TEE_CMD}
   ln -vfs ${LIB_DIR}/ /usr/share/tomcat/.guacamole | ${TEE_CMD}
   ln -vfs /usr/local/lib/freerdp/guac* /usr/lib64/freerdp | ${TEE_CMD}
+  cp -v extension/mysql/guacamole-auth-jdbc-mysql-${GUACA_VER}.jar  ${LIB_DIR}/extensions/
   cp -v mysql-connector-java-${MYSQL_CONNECTOR_VER}/mysql-connector-java-${MYSQL_CONNECTOR_VER}-bin.jar ${LIB_DIR}/lib/ | ${TEE_CMD}
   
   chown -R root:tomcat /etc/guacamole
