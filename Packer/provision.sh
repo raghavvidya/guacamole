@@ -167,7 +167,6 @@ additional_packages () {
               less \
               ftp \
               vsftpd \
-              history \
               util-linux \
               findutils \
               tree \
@@ -202,7 +201,6 @@ install_pip_packages () {
   ${PIP} install jupyter
   ${PIP} install numpy
   ${PIP} install statistics
-  ${PIP} install pandas
   ${PIP} install pandas
   ${PIP} install scipy
   ${PIP} install more-itertools
