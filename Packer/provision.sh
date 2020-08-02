@@ -326,7 +326,7 @@ install_docx2txt () {
 
 
 install_cloudinit () {
-
+  log "Installing & configure Cloud-init ...."
   yum install cloud-init
   
   #Allow root login
