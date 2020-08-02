@@ -31,7 +31,6 @@ describe pip('more-itertools','/usr/local/bin/pip3.7') do
 end
 
 
-
 describe pip('lxml','/usr/local/bin/pip3.7') do
   it { should be_installed }
   its('version') { should be >= '4.5.2' }
@@ -158,4 +157,11 @@ describe pip('Sorted','/usr/local/bin/pip3.7') do
   its('version') { should be >= '0.1.0' }
 end
 
-
+#############
+######### Yum packages
+packages = ["emacs", "libxml2","texlive","php","libffi-devel","openssl-devel","postgresql-devel","bzip2-devel","unixODBC-devel","rdiff-backup","python2-scikit-image.x86_64","scikit-image-tools","python-sqlalchemy","sqlite","zlib-devel","gcc-c++","rsync","zip","git","less","ftp","vsftpd","util-linux","findutils","tree","screen","ctags-etags","ctags","pandoc","emacs-auctex","binutils","glibc","perl-CPAN","nss-softokn-freebl","openssl-devel"]
+packages.each do |packagename|
+    describe package(packagename) do
+        it { should be_installed }
+    end
+end
