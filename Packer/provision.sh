@@ -113,7 +113,11 @@ guacamole_install () {
   mv guacamole-auth-ldap-${GUACA_VER} extension | ${TEE_CMD}
 
   tar xzf ${MYSQL_CONNECTOR}.tar.gz && rm -f ${MYSQL_CONNECTOR}.tar.gz | ${TEE_CMD}
-
+  
+  cp -v extension/mysql/guacamole-auth-jdbc-mysql-${GUACA_VER}.jar  ${LIB_DIR}/extensions/
+  cp -v extension/guacamole-auth-ldap-${GUACA_VER}/guacamole-auth-ldap-${GUACA_VER}.jar  ${LIB_DIR}/extensions/
+  cp -v mysql-connector-java-${MYSQL_CONNECTOR_VER}/mysql-connector-java-${MYSQL_CONNECTOR_VER}-bin.jar ${LIB_DIR}/lib/ | ${TEE_CMD}
+  
   cd ${INSTALL_DIR}
 
   log "Compling the Guacamole server packages ..."
