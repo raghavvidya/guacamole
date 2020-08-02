@@ -153,6 +153,7 @@ additional_packages () {
               libffi-devel \
               openssl-devel \
               bzip2-devel \
+              unixODBC-devel \
               python2-scikit-image.x86_64 \
               scikit-image-tools \
               python-sqlalchemy \
