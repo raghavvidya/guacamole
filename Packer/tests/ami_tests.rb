@@ -207,3 +207,16 @@ describe file('/var/lib/tomcat/webapps/guacamole.war') do
   its('owner') { should eq 'root' }
   its('group') { should eq 'tomcat' }
 end
+
+## ssh root logins
+describe command('grep "^PasswordAuthentication yes" /etc/ssh/sshd_config') do
+    its('stdout') { should eq "PasswordAuthentication yes\n" }
+end
+
+describe command('grep "^disable_root: 0" /etc/cloud/cloud.cfg') do
+    its('stdout') { should eq "disable_root: 0\n" }
+end
+
+describe command('grep "^ssh_pwauth: 1" /etc/cloud/cloud.cfg') do
+    its('stdout') { should eq "ssh_pwauth: 1\n" }
+end
