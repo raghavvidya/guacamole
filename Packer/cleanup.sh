@@ -1,8 +1,10 @@
 #!/bin/bash
 
 # cleanup all old logs
-sudo rm -rf /var/log/log
-sudo rm -rf /var/log/secure
-sudo rm -rf /var/log/lastlog
-sudo rm -rf /var/lib/cloud/instances/*
-sudo rm -rf /tmp/*log
+rm -rf /var/log/messages-*
+echo > /var/log/messages
+rm -rf /var/log/secure
+rm -rf /var/log/lastlog
+rm -rf /var/lib/cloud/instances/*
+rm -rf /tmp/*log
+rm -rf /root/.histor*
