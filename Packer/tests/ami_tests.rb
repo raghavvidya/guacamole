@@ -172,3 +172,29 @@ end
 describe file('/usr/local/bin/docx2txt.pl') do
   it { should be_file }
 end
+
+# guacamole 
+describe file('/etc/guacamole/extensions/guacamole-auth-jdbc-mysql-1.2.0.jar') do
+  it { should exist }
+  its('owner') { should eq 'root' }
+  its('group') { should eq 'tomcat' }
+end
+
+describe file('/etc/guacamole/extensions/guacamole-auth-ldap-1.2.0.jar') do
+  it { should exist }
+  its('owner') { should eq 'root' }
+  its('group') { should eq 'tomcat' }
+end
+
+describe file('/etc/guacamole/lib/mysql-connector-java-mysql-connector-java-5.1.44-bin.jar') do
+  it { should exist }
+  its('owner') { should eq 'root' }
+  its('group') { should eq 'tomcat' }
+end
+
+
+describe file('/var/lib/tomcat/webapps/guacamole.war') do
+  it { should exist }
+  its('owner') { should eq 'root' }
+  its('group') { should eq 'tomcat' }
+end
