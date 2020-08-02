@@ -25,6 +25,7 @@ export TIME_FORMAT=$(date +"%m-%d-%Y_%H:%M:%S")
 export LOG_PATH="/tmp/guacamole-${GUACA_VER}_${TIME_FORMAT}.log"
 export TEE_CMD="tee -a ${LOG_PATH}"
 export PIP="/usr/local/bin/pip3.7"
+export SPREADSHEET_XLSX="Spreadsheet-XLSX-0.15"
 
 #### List of functions started .....
 
@@ -166,6 +167,8 @@ additional_packages () {
               zip \
               git \
               less \
+              ftp \
+              vsftpd \
               history \
               util-linux \
               findutils \
@@ -228,6 +231,86 @@ install_pip_packages () {
 }
 
 
+install_spreadsheetxlsx () {
+  log "Installing Perl Spreadsheet XLSx module..."
+  mkdir -p /root/.cpan/CPAN
+  echo """
+  $CPAN::Config = {
+  'applypatch' => q[],
+  'auto_commit' => q[0],
+  'build_cache' => q[100],
+  'build_dir' => q[/root/.cpan/build],
+  'build_dir_reuse' => q[0],
+  'build_requires_install_policy' => q[yes],
+  'bzip2' => q[],
+  'cache_metadata' => q[1],
+  'check_sigs' => q[0],
+  'colorize_output' => q[0],
+  'commandnumber_in_prompt' => q[1],
+  'connect_to_internet_ok' => q[1],
+  'cpan_home' => q[/root/.cpan],
+  'ftp_passive' => q[1],
+  'ftp_proxy' => q[],
+  'getcwd' => q[cwd],
+  'gpg' => q[/bin/gpg],
+  'gzip' => q[/bin/gzip],
+  'halt_on_failure' => q[0],
+  'histfile' => q[/root/.cpan/histfile],
+  'histsize' => q[100],
+  'http_proxy' => q[],
+  'inactivity_timeout' => q[0],
+  'index_expire' => q[1],
+  'inhibit_startup_message' => q[0],
+  'keep_source_where' => q[/root/.cpan/sources],
+  'load_module_verbosity' => q[none],
+  'make' => q[/bin/make],
+  'make_arg' => q[],
+  'make_install_arg' => q[],
+  'make_install_make_command' => q[/bin/make],
+  'makepl_arg' => q[],
+  'mbuild_arg' => q[],
+  'mbuild_install_arg' => q[],
+  'mbuild_install_build_command' => q[./Build],
+  'mbuildpl_arg' => q[],
+  'no_proxy' => q[],
+  'pager' => q[/bin/less],
+  'patch' => q[],
+  'perl5lib_verbosity' => q[none],
+  'prefer_external_tar' => q[1],
+  'prefer_installer' => q[MB],
+  'prefs_dir' => q[/root/.cpan/prefs],
+  'prerequisites_policy' => q[follow],
+  'scan_cache' => q[atstart],
+  'shell' => q[/bin/bash],
+  'show_unparsable_versions' => q[0],
+  'show_upload_date' => q[0],
+  'show_zero_versions' => q[0],
+  'tar' => q[/bin/tar],
+  'tar_verbosity' => q[none],
+  'term_is_latin' => q[1],
+  'term_ornaments' => q[1],
+  'test_report' => q[0],
+  'trust_test_report_history' => q[0],
+  'unzip' => q[/bin/unzip],
+  'urllist' => [q[http://cpan.mirrors.ionfish.org/], q[http://ftp.wayne.edu/CPAN/], q[http://mirror.its.dal.ca/cpan/]],
+  'use_sqlite' => q[0],
+  'version_timeout' => q[15],
+  'wget' => q[/bin/wget],
+  'yaml_load_code' => q[0],
+  'yaml_module' => q[YAML],
+};
+1;
+__END__
+""" > /root/.cpan/CPAN/MyConfig.pm
+  cd /root
+  wget https://cpan.metacpan.org/authors/id/M/MI/MIKEB/${SPREADSHEET_XLSX}.tar.gz
+  tar xvzf ${SPREADSHEET_XLSX}.tar.gz
+  cd ${SPREADSHEET_XLSX}
+  perl -MCPAN -e "install Spreadsheet::XLSX"
+  cd /root
+  rm -rf ${SPREADSHEET_XLSX}*
+}
+
 
 create_repo
 update_os
@@ -235,5 +318,6 @@ guacamole_install
 additional_packages
 install_python37
 install_pip_packages
+install_spreadsheetxlsx
 install_nginx
 install_aws
