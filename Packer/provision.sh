@@ -152,6 +152,7 @@ additional_packages () {
               php \
               libffi-devel \
               openssl-devel \
+              postgresql-devel \
               bzip2-devel \
               unixODBC-devel \
               python2-scikit-image.x86_64 \
@@ -199,8 +200,8 @@ install_pip_packages () {
   ${PIP} install pandas
   ${PIP} install pandas
   ${PIP} install scipy
-  ${PIP} install itertools
-  ${PIP} install python-lxml
+  ${PIP} install more-itertools
+  ${PIP} install lxml
   ${PIP} install nltk
   ${PIP} install sas7bdat
   ${PIP} install scikit-learn
