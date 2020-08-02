@@ -330,7 +330,7 @@ install_cloudinit () {
   yum install cloud-init -y
   
   #Allow root login
-  sed -i -e 's/disable_root: *1/ssh_pwauth: 0/g' /etc/cloud/cloud.cfg
+  sed -i -e 's/disable_root: *1/disable_root: 0/g' /etc/cloud/cloud.cfg
 
   #Allow password authentication
   sed -i -e 's/ssh_pwauth: *0/ssh_pwauth: 1/g' /etc/cloud/cloud.cfg
