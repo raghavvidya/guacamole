@@ -160,7 +160,7 @@ end
 
 #############
 ######### Yum packages
-packages = ["emacs", "libxml2","texlive","php","libffi-devel","cloud-init","nginx","tomcat","openssl-devel","postgresql-devel","bzip2-devel","unixODBC-devel","rdiff-backup","python2-scikit-image.x86_64","scikit-image-tools","python-sqlalchemy","sqlite","zlib-devel","gcc-c++","rsync","zip","git","less","ftp","vsftpd","util-linux","findutils","tree","screen","ctags-etags","ctags","pandoc","emacs-auctex","binutils","glibc","sed","awk","cron","cpp","grep","less","vim","perl-CPAN","nss-softokn-freebl","openssl-devel"]
+packages = ["emacs", "libxml2","texlive","php","libffi-devel","cloud-init","nginx","tomcat","openssl-devel","postgresql-devel","bzip2-devel","unixODBC-devel","rdiff-backup","python2-scikit-image.x86_64","scikit-image-tools","python-sqlalchemy","sqlite","zlib-devel","gcc-c++","rsync","zip","git","less","ftp","vsftpd","util-linux","findutils","tree","screen","ctags-etags","ctags","pandoc","emacs-auctex","binutils","glibc","sed","gawk","crontabs","cpp","grep","less","vim","perl-CPAN","nss-softokn-freebl","openssl-devel"]
 packages.each do |packagename|
     describe package(packagename) do
         it { should be_installed }
