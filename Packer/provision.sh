@@ -108,6 +108,9 @@ guacamole_install () {
 
   tar xzf guacamole-auth-jdbc-${GUACA_VER}.tar.gz && rm -f guacamole-auth-jdbc-${GUACA_VER}.tar.gz | ${TEE_CMD}
   mv guacamole-auth-jdbc-${GUACA_VER} extension | ${TEE_CMD}
+  
+  tar xzf guacamole-auth-ldap-${GUACA_VER}.tar.gz && rm -f guacamole-auth-ldap-${GUACA_VER}.tar.gz | ${TEE_CMD}
+  mv guacamole-auth-ldap-${GUACA_VER} extension | ${TEE_CMD}
 
   tar xzf ${MYSQL_CONNECTOR}.tar.gz && rm -f ${MYSQL_CONNECTOR}.tar.gz | ${TEE_CMD}
 
