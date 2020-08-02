@@ -11,6 +11,7 @@ export INSTALL_DIR="/usr/local/src/guacamole/${GUACA_VER}/"
 export LIBJPEG_URL="http://sourceforge.net/projects/libjpeg-turbo/files/${LIBJPEG_VER}"
 export PKG_REPO="http://mirror.centos.org/centos/7/os/x86_64/Packages"
 export GUACA_URL="https://downloads.apache.org/guacamole/${GUACA_VER}/"
+export DOCX2TXT="docx2txt-1.4"
 
 # Default parameters for MySQL Database
 export MYSQL_CONNECTOR_VER="5.1.44"
@@ -47,12 +48,6 @@ create_repo () {
   yum install -y https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/e/epel-release-7-12.noarch.rpm \
                 https://download1.rpmfusion.org/free/el/rpmfusion-free-release-7.noarch.rpm \
                 https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-7.noarch.rpm | ${TEE_CMD}
-}
-
-
-update_os () {
-  log "Running the OS update..."
-  yum update -y  | ${TEE_CMD}
 }
 
 
@@ -200,6 +195,7 @@ install_python37 () {
 
 install_pip_packages () {
   log "Installing the Pip packages ..."
+  ${PIP} install --upgrade pip
   ${PIP} install jupyter
   ${PIP} install numpy
   ${PIP} install statistics
@@ -314,12 +310,24 @@ __END__
 }
 
 
+install_docx2txt () {
+    log "Installing Docx2Txt ..."
+    wget "http://downloads.sourceforge.net/docx2txt/${DOCX2TXT}.tgz?download" -O ${DOCX2TXT}.tgz
+    tar xvfz ${DOCX2TXT}.tgz
+    cd ${DOCX2TXT}
+    cp docx2txt.pl /usr/local/bin/
+    chmod +x /usr/local/bin/docx2txt.pl
+    cd ../
+    rm -rf docx2txt*
+}
+
+
 create_repo
-update_os
 guacamole_install
 additional_packages
 install_python37
 install_pip_packages
 install_spreadsheetxlsx
+install_docx2txt
 install_nginx
 install_aws
