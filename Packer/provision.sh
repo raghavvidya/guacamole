@@ -222,6 +222,7 @@ install_pip_packages () {
   ${PIP} install argparse
   ${PIP} install psycopg2  
   ${PIP} install Scikit-image
+  ${PIP} install Sqlalchemy
 }
 
 
