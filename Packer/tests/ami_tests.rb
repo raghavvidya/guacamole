@@ -167,6 +167,10 @@ packages.each do |packagename|
     end
 end
 
+describe command('/usr/local/bin/python3.7 -V') do
+   its('stdout') { should match ('Python 3.7.7') }
+end
+
 
 #### docx2txt
 describe file('/usr/local/bin/docx2txt.pl') do
