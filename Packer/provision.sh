@@ -322,6 +322,26 @@ install_docx2txt () {
 }
 
 
+install_cloudinit () {
+
+  yum install cloud-init
+  
+  #Allow root login
+  sed -i -e 's/disable_root: *1/ssh_pwauth: 0/g' /etc/cloud/cloud.cfg
+
+  #Allow password authentication
+  sed -i -e 's/ssh_pwauth: *0/ssh_pwauth: 1/g' /etc/cloud/cloud.cfg
+  sed -i -e 's/^PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+
+  #enable all cloud-init services
+  systemctl enable cloud-init-local.service
+  systemctl enable cloud-init.service
+  systemctl enable cloud-config.service
+  systemctl enable cloud-final.service
+
+}
+
+
 create_repo
 guacamole_install
 additional_packages
@@ -330,4 +350,5 @@ install_pip_packages
 install_spreadsheetxlsx
 install_docx2txt
 install_nginx
+install_cloudinit
 install_aws
