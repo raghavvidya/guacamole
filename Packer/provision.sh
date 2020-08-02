@@ -155,6 +155,7 @@ additional_packages () {
               postgresql-devel \
               bzip2-devel \
               unixODBC-devel \
+              rdiff-backup \
               python2-scikit-image.x86_64 \
               scikit-image-tools \
               python-sqlalchemy \
