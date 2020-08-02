@@ -178,6 +178,7 @@ additional_packages () {
               emacs-auctex \
               binutils \
               glibc \
+              perl-CPAN \
               nss-softokn-freebl \
               
               openssl-devel  | ${TEE_CMD}            
@@ -235,7 +236,7 @@ install_spreadsheetxlsx () {
   log "Installing Perl Spreadsheet XLSx module..."
   mkdir -p /root/.cpan/CPAN
   echo """
-  $CPAN::Config = {
+ \$CPAN::Config = {
   'applypatch' => q[],
   'auto_commit' => q[0],
   'build_cache' => q[100],
