@@ -177,6 +177,11 @@ describe file('/usr/local/bin/docx2txt.pl') do
   it { should be_file }
 end
 
+#check perl module
+describe command('perl -e "use Spreadsheet::XLSX"') do
+    its('exit_status') { should eq 0 }
+end
+
 # guacamole 
 describe file('/etc/guacamole/extensions/guacamole-auth-jdbc-mysql-1.2.0.jar') do
   it { should exist }
