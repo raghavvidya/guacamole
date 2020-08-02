@@ -101,6 +101,7 @@ guacamole_install () {
   wget --progress=bar:force ${GUACA_URL}source/guacamole-server-${GUACA_VER}.tar.gz | ${TEE_CMD}
   wget --progress=bar:force ${GUACA_URL}binary/guacamole-${GUACA_VER}.war -O ${INSTALL_DIR}client/guacamole.war | ${TEE_CMD}
   wget --progress=bar:force ${GUACA_URL}binary/guacamole-auth-jdbc-${GUACA_VER}.tar.gz | ${TEE_CMD}
+  wget --progress=bar:force ${GUACA_URL}binary/guacamole-auth-ldap-${GUACA_VER}.tar.gz | ${TEE_CMD}
   wget --progress=bar:force ${MYSQ_CONNECTOR_URL}${MYSQL_CONNECTOR}.tar.gz | ${TEE_CMD}
 
   tar xzf guacamole-server-${GUACA_VER}.tar.gz && rm -f guacamole-server-${GUACA_VER}.tar.gz | ${TEE_CMD}
