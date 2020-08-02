@@ -186,7 +186,7 @@ describe file('/etc/guacamole/extensions/guacamole-auth-ldap-1.2.0.jar') do
   its('group') { should eq 'tomcat' }
 end
 
-describe file('/etc/guacamole/lib/mysql-connector-java-mysql-connector-java-5.1.44-bin.jar') do
+describe file('/etc/guacamole/lib/mysql-connector-java-5.1.44-bin.jar') do
   it { should exist }
   its('owner') { should eq 'root' }
   its('group') { should eq 'tomcat' }
