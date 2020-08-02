@@ -175,6 +175,7 @@ additional_packages () {
               tree \
               screen \
               ctags-etags \
+              pandoc \
               emacs-auctex \
               binutils \
               glibc \
