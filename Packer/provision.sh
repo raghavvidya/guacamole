@@ -327,7 +327,7 @@ install_docx2txt () {
 
 install_cloudinit () {
   log "Installing & configure Cloud-init ...."
-  yum install cloud-init
+  yum install cloud-init -y
   
   #Allow root login
   sed -i -e 's/disable_root: *1/ssh_pwauth: 0/g' /etc/cloud/cloud.cfg
