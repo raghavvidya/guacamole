@@ -114,9 +114,10 @@ guacamole_install () {
 
   tar xzf ${MYSQL_CONNECTOR}.tar.gz && rm -f ${MYSQL_CONNECTOR}.tar.gz | ${TEE_CMD}
   
-  cp -v extension/mysql/guacamole-auth-jdbc-mysql-${GUACA_VER}.jar  ${LIB_DIR}/extensions/
-  cp -v extension/guacamole-auth-ldap-${GUACA_VER}/guacamole-auth-ldap-${GUACA_VER}.jar  ${LIB_DIR}/extensions/
+  cp -v extension/mysql/guacamole-auth-jdbc-mysql-${GUACA_VER}.jar  ${LIB_DIR}/extensions/ | ${TEE_CMD}
+  cp -v extension/guacamole-auth-ldap-${GUACA_VER}/guacamole-auth-ldap-${GUACA_VER}.jar  ${LIB_DIR}/extensions/ | ${TEE_CMD}
   cp -v mysql-connector-java-${MYSQL_CONNECTOR_VER}/mysql-connector-java-${MYSQL_CONNECTOR_VER}-bin.jar ${LIB_DIR}/lib/ | ${TEE_CMD}
+  chown -R root:tomcat /etc/guacamole
   
   cd ${INSTALL_DIR}
 
