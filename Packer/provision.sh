@@ -170,6 +170,7 @@ additional_packages () {
               rsync \
               zip \
               git \
+              vim \
               less \
               ftp \
               vsftpd \
