@@ -131,6 +131,7 @@ guacamole_install () {
   cd ../
 
   log "Installing the Guacamole client packages ..."
+  systemctl start tomcat
   cp -v client/guacamole.war /var/lib/tomcat/webapps/guacamole.war | ${TEE_CMD}
   
   #changing the permissions
