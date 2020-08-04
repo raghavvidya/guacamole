@@ -38,9 +38,12 @@ log (){
 }
 
 install_aws () {
-yum install python-pip -y
-pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
-
+  log "Installing the AWS cfn bootstrap...."
+  curl -O https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+  tar -xvpf aws-cfn-bootstrap-latest.tar.gz
+  cd aws-cfn-bootstrap-1.4/
+  python setup.py build
+  python setup.py install
 }
 
 create_repo () {
