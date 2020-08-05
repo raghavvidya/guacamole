@@ -1,0 +1,7 @@
+[
+  {
+    "op": "add",
+    "path": "/connectionPermissions/CONNECTIONID_REPLACEME",
+    "value": "READ"
+  }
+]
