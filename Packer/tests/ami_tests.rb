@@ -319,18 +319,19 @@ title 'Make sure root login is enabled'
   describe command('grep "^PasswordAuthentication yes" /etc/ssh/sshd_config') do
       its('stdout') { should eq "PasswordAuthentication yes\n" }
   end
-end
 
-control 'mytest' do
-title 'Server'
   describe command('grep "^disable_root: 0" /etc/cloud/cloud.cfg') do
       its('stdout') { should eq "disable_root: 0\n" }
   end
-end
 
-control 'mytest' do
-title 'Server'
   describe command('grep "^ssh_pwauth: 1" /etc/cloud/cloud.cfg') do
       its('stdout') { should eq "ssh_pwauth: 1\n" }
+  end
+end
+
+control 'SYS-01' do
+title 'Make sure hostname is set - server1'
+  describe sys_info do
+    its('hostname') { should eq 'ip-172-31-45-54.ec2.internal' }
   end
 end
