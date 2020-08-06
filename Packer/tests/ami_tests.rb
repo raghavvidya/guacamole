@@ -329,7 +329,7 @@ title 'Make sure root login is enabled'
   end
 end
 
-control 'SYS-01' do
+control 'SYS-02' do
 title 'Make sure hostname is set - server1'
   describe sys_info do
     its('hostname') { should eq 'ip-172-31-45-54.ec2.internal' }
