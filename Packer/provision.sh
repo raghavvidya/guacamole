@@ -190,8 +190,7 @@ additional_packages () {
               binutils \
               glibc \
               perl-CPAN \
-              nss-softokn-freebl \
-              
+              nss-softokn-freebl \            
               openssl-devel  | ${TEE_CMD}            
 }
 
