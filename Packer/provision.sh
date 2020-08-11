@@ -39,11 +39,12 @@ log (){
 
 install_aws () {
   log "Installing the AWS cfn bootstrap...."
-  curl -O https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
-  tar -xvpf aws-cfn-bootstrap-latest.tar.gz
-  cd aws-cfn-bootstrap-1.4/
-  python setup.py build
-  python setup.py install
+    alternatives --set python /usr/bin/python2
+    curl -O https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+    tar xvf aws-cfn-bootstrap-latest.tar.gz
+    cd aws-cfn-bootstrap-*/
+    python2 setup.py build
+    python2 setup.py install
 }
 
 create_repo () {
@@ -82,15 +83,16 @@ guacamole_install () {
               libtool      \
               wget     \
               gcc     \
-              tomcat   \
               unzip    \
+              tigervnc-server \
               libtelnet-devel  \
               libvncserver-devel \
               libwebsockets-devel  \
               openssl-devel  \
               mariadb  \
               mariadb-server | ${TEE_CMD}
-
+  yum groupinstall "Server with GUI" -y
+  
   ln -vfs /opt/libjpeg-turbo/include/* /usr/include/ | ${TEE_CMD}
   ln -vfs /opt/libjpeg-turbo/lib??/* /usr/lib64/ | ${TEE_CMD}
 
@@ -353,6 +355,52 @@ install_cloudinit () {
 
 }
 
+install_tomcat () {
+  log "Installing Tomcat version 8.5.40"
+  groupadd tomcat
+  useradd -g tomcat -d /opt/tomcat -s /bin/nologin tomcat
+
+  wget https://www-us.apache.org/dist/tomcat/tomcat-8/v8.5.40/bin/apache-tomcat-8.5.40.tar.gz
+
+  tar -zxvf apache-tomcat-*.tar.gz
+  mv apache-tomcat-*/* /opt/tomcat/
+
+  chown -R tomcat:tomcat /opt/tomcat/
+
+  chmod +x /opt/tomcat/bin/*.sh
+
+echo """
+[Unit]
+Description=Apache Tomcat Web Application Container
+Wants=network.target
+After=network.target
+
+[Service]
+Type=forking
+
+Environment=JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.252.b09-2.el7_8.x86_64/jre
+
+Environment=CATALINA_PID=/opt/tomcat/temp/tomcat.pid
+Environment=CATALINA_HOME=/opt/tomcat
+Environment='CATALINA_OPTS=-Xms512M -Xmx1G -Djava.net.preferIPv4Stack=true'
+Environment='JAVA_OPTS=-Djava.awt.headless=true'
+
+ExecStart=/opt/tomcat/bin/startup.sh
+ExecStop=/opt/tomcat/bin/shutdown.sh
+SuccessExitStatus=143
+
+User=tomcat
+Group=tomcat
+UMask=0007
+RestartSec=10
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+""" >  /etc/systemd/system/tomcat.service
+
+}
+
 
 create_repo
 guacamole_install
@@ -361,6 +409,7 @@ install_python37
 install_pip_packages
 install_spreadsheetxlsx
 install_docx2txt
+install_tomcat
 install_nginx
 install_cloudinit
 install_aws
